@@ -20,16 +20,9 @@ public class MoralisWeb3AuthService : MonoBehaviour
 
     private RequestData requestData;
 
-    [Header("Server Information")]
-    [SerializeField] private string baseUrl;
-
     [Header("Events")]
     public UnityEvent OnSuccess = new UnityEvent();
     public UnityEvent OnFailed = new UnityEvent();
-
-    // Endpoints
-    private const string RequestEndpoint = "/request";
-    private const string VerifyEndpoint = "/verify";
 
     // Main Components
     private AuthenticationKit authenticationKit;
@@ -68,7 +61,8 @@ public class MoralisWeb3AuthService : MonoBehaviour
         form.AddField("address", address);
         form.AddField("chain", hexChainId);
          
-        using (UnityWebRequest webRequest = UnityWebRequest.Post(baseUrl + RequestEndpoint, form))
+        using (UnityWebRequest webRequest = UnityWebRequest.Post(
+            ServerConfiguration.URL + ServerConfiguration.RequestEndpoint, form))
         {
             yield return webRequest.SendWebRequest();
 
@@ -128,7 +122,8 @@ public class MoralisWeb3AuthService : MonoBehaviour
         form.AddField("message", message);
         form.AddField("signature", signature);
 
-        using (UnityWebRequest webRequest = UnityWebRequest.Post(baseUrl + VerifyEndpoint, form))
+        using (UnityWebRequest webRequest = UnityWebRequest.Post(
+            ServerConfiguration.URL + ServerConfiguration.VerifyEndpoint, form))
         {
             yield return webRequest.SendWebRequest();
 

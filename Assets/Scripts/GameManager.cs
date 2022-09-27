@@ -1,13 +1,19 @@
 using MoralisUnity.Kits.AuthenticationKit;
 using StarterAssets;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
+using WalletConnectSharp.Unity;
 
 public class GameManager : MonoBehaviour
 {
     public AuthenticationKit authenticationKit;
     public StarterAssetsInputs starterAssetsInput;
-    public Text menuText;
+
+    [Header("HUD")]
+    public Text menuLabel;
+    public Text nativeBalanceLabel;
 
     private void Update()
     {
@@ -32,12 +38,31 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void OnAuthenticatedSuccessfuly()
+    {
+#if !UNITY_WEBGL
+        // Get the address and chainid with WalletConnect 
+
+        // TODO Internal Note: If we contiue to offer the AuthenticationKit,
+        // it would be nice to have something like authenticationKit.getWalletAddress()
+        string address = WalletConnect.ActiveSession.Accounts[0];
+        int chainId = WalletConnect.ActiveSession.ChainId;
+#else
+        // Get the address and chainid with Web3 
+        string address = Web3GL.Account().ToLower();
+        int chainId = Web3GL.ChainId();
+#endif
+
+        StartCoroutine(GetNativeBalance(address, chainId));
+        CloseMenu();
+    }
+
     public void OpenMenu()
     {
         authenticationKit.gameObject.SetActive(true);
         starterAssetsInput.EnableInput(false);
 
-        menuText.text = "Press 'M' to close Menu";
+        menuLabel.text = "Press 'M' to close Menu";
     }
 
     public void CloseMenu()
@@ -45,6 +70,31 @@ public class GameManager : MonoBehaviour
         authenticationKit.gameObject.SetActive(false);
         starterAssetsInput.EnableInput(true);
 
-        menuText.text = "Press 'M' to open Menu";
+        menuLabel.text = "Press 'M' to open Menu";
+    }
+
+    IEnumerator GetNativeBalance(string address, int chainId)
+    {
+        var hexChainId = $"0x{chainId:X}";
+
+        WWWForm form = new WWWForm();
+        form.AddField("address", address);
+        form.AddField("chain", hexChainId);
+
+        using (UnityWebRequest webRequest = UnityWebRequest.Post(
+            ServerConfiguration.URL + ServerConfiguration.NativeBalanceEndpoint, form))
+        {
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log(webRequest.downloadHandler.text);
+                nativeBalanceLabel.text = webRequest.downloadHandler.text;
+            }
+            else
+            {
+                Debug.LogError("Error: " + webRequest.error);
+            }
+        }
     }
 }
