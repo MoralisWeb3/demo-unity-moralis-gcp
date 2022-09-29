@@ -1,5 +1,4 @@
 using MoralisUnity.Kits.AuthenticationKit;
-using StarterAssets;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -59,6 +58,8 @@ public class GameManager : MonoBehaviour
         playerController.walletAddress.Show(address);
         StartCoroutine(GetNativeBalance(address, chainId));
         CloseMenu();
+
+        Debug.Log("You're authenticated!");
     }
 
     public void OnDisconnected()
