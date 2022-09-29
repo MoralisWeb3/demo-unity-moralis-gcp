@@ -64,11 +64,11 @@ public class GameManager : MonoBehaviour
     public void OnDisconnected()
     {
         playerController.walletAddress.Hide();
-        nativeBalanceLabel.text = "0";
+        nativeBalanceLabel.text = "<b>Native balance</b>: not retrieved";
         CloseMenu();
     }
 
-    public void OpenMenu()
+    private void OpenMenu()
     {
         authenticationKit.gameObject.SetActive(true);
         playerController.input.EnableInput(false);
@@ -76,7 +76,7 @@ public class GameManager : MonoBehaviour
         menuLabel.text = "Press 'M' to close Menu";
     }
 
-    public void CloseMenu()
+    private void CloseMenu()
     {
         authenticationKit.gameObject.SetActive(false);
         playerController.input.EnableInput(true);
@@ -99,12 +99,13 @@ public class GameManager : MonoBehaviour
 
             if (webRequest.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log(webRequest.downloadHandler.text);
-                nativeBalanceLabel.text = webRequest.downloadHandler.text;
+                Debug.Log("Native balance: " + webRequest.downloadHandler.text);
+                nativeBalanceLabel.text = "<b>Native balance</b>: " + webRequest.downloadHandler.text;
             }
             else
             {
                 Debug.LogError("Error: " + webRequest.error);
+                nativeBalanceLabel.text = "<b>Native balance</b>: could not retrieve";
             }
         }
     }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 [RequireComponent(typeof(TextMesh))]
 public class PlayerWalletAddress : MonoBehaviour
@@ -22,6 +23,8 @@ public class PlayerWalletAddress : MonoBehaviour
 
     public void Show(string address)
     {
+        //TODO formatting
+        address = address.Remove(6,30).Insert(6, "...");
         textMesh.text = address;
     }
 
