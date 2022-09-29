@@ -8,8 +8,11 @@ using WalletConnectSharp.Unity;
 
 public class GameManager : MonoBehaviour
 {
+    [Header("Moralis")]
     public AuthenticationKit authenticationKit;
-    public StarterAssetsInputs starterAssetsInput;
+
+    [Header("Player")]
+    public PlayerController playerController;
 
     [Header("HUD")]
     public Text menuLabel;
@@ -38,7 +41,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void OnAuthenticatedSuccessfuly()
+    public void OnAuthenticatedSuccessfully()
     {
 #if !UNITY_WEBGL
         // Get the address and chainid with WalletConnect 
@@ -53,14 +56,22 @@ public class GameManager : MonoBehaviour
         int chainId = Web3GL.ChainId();
 #endif
 
+        playerController.walletAddress.Show(address);
         StartCoroutine(GetNativeBalance(address, chainId));
+        CloseMenu();
+    }
+
+    public void OnDisconnected()
+    {
+        playerController.walletAddress.Hide();
+        nativeBalanceLabel.text = "0";
         CloseMenu();
     }
 
     public void OpenMenu()
     {
         authenticationKit.gameObject.SetActive(true);
-        starterAssetsInput.EnableInput(false);
+        playerController.input.EnableInput(false);
 
         menuLabel.text = "Press 'M' to close Menu";
     }
@@ -68,7 +79,7 @@ public class GameManager : MonoBehaviour
     public void CloseMenu()
     {
         authenticationKit.gameObject.SetActive(false);
-        starterAssetsInput.EnableInput(true);
+        playerController.input.EnableInput(true);
 
         menuLabel.text = "Press 'M' to open Menu";
     }
